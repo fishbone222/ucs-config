@@ -1,6 +1,8 @@
 read -p "ip of ucs-master: " ipadd
 export MASTER_IP=$ipadd
 
+dnf install -y sssd-ldap
+
 # Set the IP address of the UCS DC Master, 192.168.0.3 in this example
 echo $MASTER_IP
 mkdir /etc/univention
@@ -19,7 +21,7 @@ wget -O /etc/univention/ssl/ucsCA/CAcert.pem \
 
 # Create an account and save the password
 password="$(tr -dc A-Za-z0-9_ </dev/urandom | head -c20)"
-ssh -n root@${ldap_master} udm computers/ubuntu create \
+ssh -n root@${ldap_master} udm computers/linux create \
     --position "cn=computers,${ldap_base}" \
     --set name=$(hostname -s) --set password="${password}" \
     --set operatingSystem="$(lsb_release -is)" \

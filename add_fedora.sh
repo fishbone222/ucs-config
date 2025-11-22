@@ -5,7 +5,7 @@ dnf install -y sssd-ldap
 
 # Set the IP address of the UCS DC Master, 192.168.0.3 in this example
 echo $MASTER_IP
-mkdir /etc/univention
+mkdir /etc/univention -p
 ssh -n root@${MASTER_IP} 'ucr shell | grep -v ^hostname=' >/etc/univention/ucr_master
 echo "master_ip=${MASTER_IP}" >>/etc/univention/ucr_master
 chmod 660 /etc/univention/ucr_master

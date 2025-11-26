@@ -1,7 +1,7 @@
 read -p "ip of ucs-master: " ipadd
 export MASTER_IP=$ipadd
 
-dnf install -y sssd-ldap
+dnf install -y sssd-ldap sssd-tools sssd-krb5 samba-winbind nss-tools krb5-workstation autofs
 
 # Set the IP address of the UCS DC Master, 192.168.0.3 in this example
 echo $MASTER_IP

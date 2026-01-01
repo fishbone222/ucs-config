@@ -102,8 +102,59 @@ ssh -n Administrator@$ldap_master ls /etc/univention
 # Destroy the kerberos ticket
 kdestroy
 
-#add sso to chromium
-echo "{
-	\"AuthServerWhitelist\":\"$keycloak_server_sso_fqdn\",
-	\"AuthNegotiateDelegateWhitelist\":\"$keycloak_server_sso_fqdn\"
-}" > /etc/chromium/policies/managed/kerberos.json
+#add sso to browsers
+DOMAIN="$keycloak_server_sso_fqdn"
+
+echo "Configuring Kerberos SSO for browsers -> ${DOMAIN}"
+
+########################################
+# Firefox (system-wide policy)
+########################################
+
+FIREFOX_POLICY_DIR="/etc/firefox/policies"
+FIREFOX_POLICY_FILE="${FIREFOX_POLICY_DIR}/policies.json"
+
+echo "Configuring Firefox policy..."
+
+sudo mkdir -p "${FIREFOX_POLICY_DIR}"
+
+sudo tee "${FIREFOX_POLICY_FILE}" > /dev/null <<EOF
+{
+  "policies": {
+    "Authentication": {
+      "SPNEGO": [ "${DOMAIN}" ],
+      "Delegation": [ "${DOMAIN}" ]
+    }
+  }
+}
+EOF
+
+########################################
+# Chromium / Google Chrome (policy)
+########################################
+
+CHROME_POLICY_DIR="/etc/chromium/policies/managed"
+CHROME_POLICY_FILE="${CHROME_POLICY_DIR}/kerberos.json"
+
+# Google Chrome also reads Chromium policy paths on Fedora,
+# but we create both to be safe.
+CHROME_GOOGLE_DIR="/etc/opt/chrome/policies/managed"
+CHROME_GOOGLE_FILE="${CHROME_GOOGLE_DIR}/kerberos.json"
+
+echo "Configuring Chromium / Chrome policy..."
+
+sudo mkdir -p "${CHROME_POLICY_DIR}" "${CHROME_GOOGLE_DIR}"
+
+sudo tee "${CHROME_POLICY_FILE}" > /dev/null <<EOF
+{
+  "AuthServerWhitelist": "${DOMAIN}",
+  "AuthNegotiateDelegateWhitelist": "${DOMAIN}"
+}
+EOF
+
+sudo tee "${CHROME_GOOGLE_FILE}" > /dev/null <<EOF
+{
+  "AuthServerWhitelist": "${DOMAIN}",
+  "AuthNegotiateDelegateWhitelist": "${DOMAIN}"
+}
+EOF

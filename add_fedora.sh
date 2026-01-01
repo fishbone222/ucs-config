@@ -101,3 +101,9 @@ ssh -n Administrator@$ldap_master ls /etc/univention
 
 # Destroy the kerberos ticket
 kdestroy
+
+#add sso to chromium
+echo "{
+	\"AuthServerWhitelist\":\"$keycloak_server_sso_fqdn\",
+	\"AuthNegotiateDelegateWhitelist\":\"$keycloak_server_sso_fqdn\"
+}" > /etc/chromium/policies/managed/kerberos.json
